@@ -8,7 +8,7 @@
       </div>
 
       <div class="tracking-wider flex-1">
-        数据更新时间: {{ ChangeTime }}
+        数据更新时间: {{ time }}
         <span class="ml-2" v-if="isMobileTerminal" @click="onClick">查看详情</span>
       </div>
     </div>
@@ -21,22 +21,15 @@ import { onMounted, ref } from 'vue'
 import { useWindowSize } from '@vueuse/core'
 import { Chart } from '@antv/g2'
 import { useRouter } from 'vue-router'
-import { getTakeRate } from '@/api/get'
 import { Rate } from '@/constants'
 import { isMobileTerminal } from '@/utils/flexible'
+
+const { rateList, time } = defineProps<{ rateList: Rate[]; time: string }>()
 
 // 获取窗口宽度与高度 响应式
 const { width, height } = useWindowSize()
 const router = useRouter()
-const RateList = ref<Rate[]>([])
-const ChangeTime = ref<string>('')
 
-const getRate = async () => {
-  const { data } = await getTakeRate()
-  RateList.value = data.data.result
-  ChangeTime.value = data.data.result[0].time
-  init()
-}
 const onClick = () => router.push('/detial')
 
 async function init() {
@@ -49,7 +42,7 @@ async function init() {
   })
   chart.coordinate().transpose()
 
-  chart.data(RateList.value)
+  chart.data(rateList)
 
   // 动画
   chart.animate(true)
@@ -114,5 +107,5 @@ async function init() {
 
   chart.render()
 }
-onMounted(() => getRate())
+onMounted(() => init())
 </script>

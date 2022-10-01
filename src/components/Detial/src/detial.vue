@@ -6,7 +6,7 @@
         每日健康监测数据详情
         <span class="text-xl" v-if="!isMobileTerminal" @click="onClick">返回</span>
       </div>
-      <div class="tracking-wider flex-1">数据更新时间: {{ ChangeTime }} <span class="ml-2" v-if="isMobileTerminal" @click="onClick">返回</span></div>
+      <div class="tracking-wider flex-1">数据更新时间: {{ time }} <span class="ml-2" v-if="isMobileTerminal" @click="onClick">返回</span></div>
     </div>
 
     <div class="w-full xl:w-[1024px] mx-auto">
@@ -38,13 +38,11 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { getDetail, getNotList } from '@/api/get'
 import { Detail } from '@/constants'
 import type { TableColumnType } from 'ant-design-vue'
 import { DownOutlined } from '@ant-design/icons-vue'
-import dayjs from 'dayjs'
 import { isMobileTerminal } from '@/utils/flexible'
 
 type TableDataType = {
@@ -53,27 +51,30 @@ type TableDataType = {
   name: string
   progress: string
 }
+
+const { originalClassList, time, gradeList } = defineProps<{ dataSource: Detail[]; originalClassList: { grade: string; class: string }[]; time: string; gradeList: string[] }>()
+
+const emits = defineEmits(['changeClass'])
 const router = useRouter()
 const onClick = () => router.push('/main')
+
 const gradeLoading = ref(true)
 const gradeTitle = ref('请选择年级')
-const gradeList = ref<string[]>([])
+
 const changeGrade = (value: any) => {
   gradeTitle.value = value
-  classList.value = originalClassList.value.filter((item) => item.grade === gradeTitle.value)
+  classList.value = originalClassList.filter((item) => item.grade === gradeTitle.value)
   classTitle.value = '请选择班级'
 }
 
 const classLoading = ref(true)
 const classTitle = ref('请选择班级')
 const classList = ref<{ grade: string; class: string }[]>([])
-const originalClassList = ref<{ grade: string; class: string }[]>([])
 
 const changeClass = (value: { grade: string; class: string }) => {
+  emits('changeClass', value.class)
   classTitle.value = value.class
 }
-
-const dataSource = ref<Detail[]>([])
 
 const columns: TableColumnType<TableDataType>[] = [
   {
@@ -115,31 +116,8 @@ const columnsMobile: TableColumnType<TableDataType>[] = [
     key: 'progress'
   }
 ]
-
-const ChangeTime = ref<string>('')
-
-const getInfo = async (value?: string) => {
-  const { data } = await getDetail(value)
-  dataSource.value = data.data.result
-  ChangeTime.value = dayjs(data.data.result[0]?.createdDate).format('YYYY-MM-DD HH:mm:ss')
-}
-const getGrade = async () => {
-  const { data } = await getNotList()
+onMounted(() => {
   gradeLoading.value = false
   classLoading.value = false
-  gradeList.value = data.data.result.gradeList
-  originalClassList.value = data.data.result.classList
-}
-onMounted(() => {
-  getInfo()
-  getGrade()
 })
-
-watch(
-  () => classTitle.value,
-  (value) => {
-    getInfo(value)
-  },
-  { immediate: true }
-)
 </script>
