@@ -24,12 +24,12 @@ const getInfo = async (value?: string) => {
   const { data } = await getDetail(value)
   dataSource.value = data.data.result
   ChangeTime.value = dayjs(data.data.result[0]?.createdDate).format('YYYY-MM-DD HH:mm:ss')
-  loading.value = false
 }
 const getGrade = async () => {
   const { data } = await getNotList()
   gradeList.value = data.data.result.gradeList
   originalClassList.value = data.data.result.classList
+  loading.value = false
 }
 
 onMounted(() => {

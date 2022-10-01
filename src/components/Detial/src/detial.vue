@@ -63,7 +63,7 @@ const gradeTitle = ref('请选择年级')
 
 const changeGrade = (value: any) => {
   gradeTitle.value = value
-  classList.value = originalClassList.filter((item) => item.grade === gradeTitle.value)
+  classList.value = originalClassList.filter((item) => item.grade === value)
   classTitle.value = '请选择班级'
 }
 
