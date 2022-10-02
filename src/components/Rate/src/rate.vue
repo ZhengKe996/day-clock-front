@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted } from 'vue'
 import { useWindowSize } from '@vueuse/core'
 import { Chart } from '@antv/g2'
 import { useRouter } from 'vue-router'
@@ -26,11 +26,15 @@ import { isMobileTerminal } from '@/utils/flexible'
 
 const { rateList, time } = defineProps<{ rateList: Rate[]; time: string }>()
 
+const keepTwoDecimalWithReg = (num: number) => {
+  return Number((num * 100).toString().match(/^\d+(?:\.\d{0,2})?/))
+}
+
 // 获取窗口宽度与高度 响应式
 const { width, height } = useWindowSize()
 const router = useRouter()
 
-const onClick = () => router.push('/detial')
+const onClick = () => router.push({ path: '/detial' })
 
 async function init() {
   const chart = new Chart({
@@ -60,7 +64,7 @@ async function init() {
       min: 0,
       alias: '打卡率',
       formatter: (val) => {
-        return +val * 100 + '%'
+        return +keepTwoDecimalWithReg(val) + '%'
       }
     },
     class: {
@@ -89,7 +93,7 @@ async function init() {
     })
     .label('rate', (val) => {
       return {
-        content: val * 100 + '%',
+        content: +keepTwoDecimalWithReg(val) + '%',
         style: {
           fill: val === 1 ? 'green' : 'red'
         },
