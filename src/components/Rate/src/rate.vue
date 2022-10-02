@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full h-full">
+  <div class="w-full xl:w-[1024px] h-full mx-auto">
     <div class="mt-2 text-center font-mono text-base antialiased font-medium tracking-widest align-middle divide-y-2 divide-opacity-40 divide-dotted">
       <div class="text-3xl font-bold leading-normal">
         物联网技术学院<br />
@@ -12,12 +12,12 @@
         <span class="ml-2" v-if="isMobileTerminal" @click="onClick">查看详情</span>
       </div>
     </div>
-    <div id="container"></div>
+    <div id="container" class="w-full mx-auto top-0 left-auto"></div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useWindowSize } from '@vueuse/core'
 import { Chart } from '@antv/g2'
 import { useRouter } from 'vue-router'
@@ -25,13 +25,14 @@ import { Rate } from '@/constants'
 import { isMobileTerminal } from '@/utils/flexible'
 
 const { rateList, time } = defineProps<{ rateList: Rate[]; time: string }>()
-
+const ratebox = ref(null)
 const keepTwoDecimalWithReg = (num: number) => {
   return Number((num * 100).toString().match(/^\d+(?:\.\d{0,2})?/))
 }
 
 // 获取窗口宽度与高度 响应式
-const { width, height } = useWindowSize()
+const { height } = useWindowSize()
+
 const router = useRouter()
 
 const onClick = () => router.push({ path: '/detial' })
@@ -41,7 +42,6 @@ async function init() {
     container: 'container',
     autoFit: true,
     height: height.value * 0.95,
-    width: width.value * 0.95,
     padding: [10, 70, 50, 100]
   })
   chart.coordinate().transpose()
