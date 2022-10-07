@@ -3,29 +3,33 @@
     <div class="mt-2 text-center font-mono text-base antialiased font-medium tracking-widest align-middle divide-y-2 divide-opacity-40 divide-dotted">
       <div class="text-3xl font-bold leading-normal">
         物联网技术学院<br />
-        每日健康监测打卡率
-        <span class="text-xl" v-if="!isMobileTerminal" @click="onClick">查看详情</span>
+        每日健康监测各班打卡率
+        <br />
+        <div v-if="!isMobileTerminal">
+          <span class="text-2xl" v-show="notCount > 0"> 当前未打卡人数: {{ notCount }} </span>
+          <span class="text-xl ml-6" @click="onClick">查看详情</span>
+        </div>
       </div>
 
-      <div class="tracking-wider flex-1">
-        数据更新时间: {{ time }}
-        <span class="ml-2" v-if="isMobileTerminal" @click="onClick">查看详情</span>
+      <div class="tracking-wider flex-1 text-xl mt-1" v-if="isMobileTerminal">
+        当前未打卡人数: {{ notCount }} 人 <span class="ml-1 text-base" v-if="isMobileTerminal" @click="onClick">查看详情</span>
       </div>
+      <div class="tracking-wider flex-1 mt-1">数据更新时间: {{ time }}</div>
     </div>
     <div id="container" class="w-full mx-auto top-0 left-auto"></div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted } from 'vue'
 import { useWindowSize } from '@vueuse/core'
 import { Chart } from '@antv/g2'
 import { useRouter } from 'vue-router'
 import { Rate } from '@/constants'
 import { isMobileTerminal } from '@/utils/flexible'
 
-const { rateList, time } = defineProps<{ rateList: Rate[]; time: string }>()
-const ratebox = ref(null)
+const { rateList, time } = defineProps<{ rateList: Rate[]; time: string; notCount: number }>()
+
 const keepTwoDecimalWithReg = (num: number) => {
   return Number((num * 100).toString().match(/^\d+(?:\.\d{0,2})?/))
 }
@@ -42,7 +46,7 @@ async function init() {
     container: 'container',
     autoFit: true,
     height: height.value * 0.95,
-    padding: [10, 70, 50, 100]
+    padding: [10, 50, 50, 100]
   })
   chart.coordinate().transpose()
 
@@ -69,6 +73,12 @@ async function init() {
     },
     class: {
       alias: '班级'
+    },
+    counting: {
+      alias: '总人数'
+    },
+    notclock: {
+      alias: '未打卡人数'
     }
   })
 
@@ -100,14 +110,14 @@ async function init() {
         offsetX: 5
       }
     })
-    .position(['class', 'rate'])
+    .position(['class', 'rate', 'counting', 'notclock'])
     .color('rate', (val) => {
       if (val === 1) return '#67C23A'
       if (val >= 0.8) return '#409EFF'
       if (val >= 0.6) return '#E6A23C'
       return '#F56C6C'
     })
-    .tooltip('class*rate')
+    .tooltip('class*rate*counting*notclock')
 
   chart.render()
 }
